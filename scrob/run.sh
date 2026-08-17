@@ -6,13 +6,6 @@ SECRET_KEY=$(jq -r '.secret_key // ""' /data/options.json)
 ENABLE_REGISTRATIONS=$(jq -r '.enable_registrations // false' /data/options.json)
 TZ_VALUE=$(jq -r '.timezone // "America/Argentina/Buenos_Aires"' /data/options.json)
 
-# Persistent storage — all under /data (HA backs this up automatically).
-# The omnibus image declares VOLUME on /app/backend/data and /app/postgres/data,
-# so we bind-mount our /data subdirs over them (requires privileged mode).
-mkdir -p /data/backend /data/postgres
-mount --bind /data/backend /app/backend/data
-mount --bind /data/postgres /app/postgres/data
-
 export PUID=1000
 export PGID=1000
 export TZ="$TZ_VALUE"
@@ -25,5 +18,7 @@ if [ "$ENABLE_REGISTRATIONS" = "true" ]; then
     export ENABLE_REGISTRATIONS="true"
 fi
 
-# Hand off to the upstream entrypoint (starts embedded Postgres + migrations + supervisord)
+# Hand off to the upstream entrypoint (starts embedded Postgres + migrations + supervisord).
+# Data persists in the Docker volumes the Supervisor mounts on /app/backend/data
+# and /app/postgres/data (declared as VOLUME in the upstream image).
 exec /entrypoint.omnibus.sh
