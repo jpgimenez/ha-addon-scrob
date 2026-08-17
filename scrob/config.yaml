@@ -11,6 +11,7 @@ arch:
   - aarch64
 startup: application
 boot: auto
+privileged: true
 ports:
   7330/tcp: 7330
 ports_description:

@@ -6,12 +6,12 @@ SECRET_KEY=$(jq -r '.secret_key // ""' /data/options.json)
 ENABLE_REGISTRATIONS=$(jq -r '.enable_registrations // false' /data/options.json)
 TZ_VALUE=$(jq -r '.timezone // "America/Argentina/Buenos_Aires"' /data/options.json)
 
-# Persistent storage — all under /data (HA backs this up automatically)
-# The omnibus image stores app data and embedded Postgres under /app/backend/data
-# and /app/postgres/data. Symlink both to /data so HA backs them up.
+# Persistent storage — all under /data (HA backs this up automatically).
+# The omnibus image declares VOLUME on /app/backend/data and /app/postgres/data,
+# so we bind-mount our /data subdirs over them (requires privileged mode).
 mkdir -p /data/backend /data/postgres
-ln -sfn /data/backend /app/backend/data
-ln -sfn /data/postgres /app/postgres/data
+mount --bind /data/backend /app/backend/data
+mount --bind /data/postgres /app/postgres/data
 
 export PUID=1000
 export PGID=1000
