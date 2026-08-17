@@ -1,5 +1,5 @@
 name: Scrob
-version: "1.0.1"
+version: "1.0.2"
 slug: scrob
 description: >-
   Self-hosted media tracking (your personal Letterboxd + Trakt).
@@ -11,7 +11,8 @@ arch:
   - aarch64
 startup: application
 boot: auto
-privileged: true
+privileged:
+  - SYS_ADMIN
 ports:
   7330/tcp: 7330
 ports_description:
