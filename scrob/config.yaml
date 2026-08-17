@@ -1,0 +1,33 @@
+name: Scrob
+version: "1.0.0"
+slug: scrob
+description: >-
+  Self-hosted media tracking (your personal Letterboxd + Trakt).
+  Syncs libraries from Jellyfin, Plex, Emby, Nuvio, ARVIO and Stremio,
+  tracks watch history, ratings and personal lists.
+url: https://github.com/ellite/scrob
+arch:
+  - amd64
+  - aarch64
+startup: application
+boot: auto
+ports:
+  7330/tcp: 7330
+ports_description:
+  7330/tcp: Scrob Web UI & API
+webui: "http://[HOST]:[PORT:7330]"
+panel_icon: mdi:movie-open-check
+panel_title: Scrob
+map:
+  - type: data
+    read_only: false
+options:
+  secret_key: ""
+  enable_registrations: false
+  timezone: "America/Argentina/Buenos_Aires"
+  log_level: "info"
+schema:
+  secret_key: "password"
+  enable_registrations: "bool"
+  timezone: "str"
+  log_level: "list(debug|info|warn|error)"
