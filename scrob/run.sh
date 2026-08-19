@@ -13,10 +13,12 @@ TZ_VALUE=$(jq -r '.timezone // "America/Argentina/Buenos_Aires"' /data/options.j
 # entrypoint para que use /data directamente (sin mount --bind, que falla
 # porque esos puntos ya son mounts del host).
 mkdir -p /data/backend /data/postgres
-# Reescribir las rutas hardcodeadas del entrypoint hacia /data
+# Reescribir las rutas hardcodeadas del entrypoint y supervisord hacia /data
 sed -i 's|PGDATA=/app/postgres/data|PGDATA=/data/postgres|g' /entrypoint.omnibus.sh
 sed -i 's|/app/backend/data|/data/backend|g' /entrypoint.omnibus.sh
 sed -i 's|/app/postgres/data|/data/postgres|g' /entrypoint.omnibus.sh
+sed -i 's|/app/postgres/data|/data/postgres|g' /etc/supervisor/supervisord.omnibus.conf
+sed -i 's|/app/backend/data|/data/backend|g' /etc/supervisor/supervisord.omnibus.conf
 
 export PUID=1000
 export PGID=1000
