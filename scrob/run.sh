@@ -6,6 +6,15 @@ SECRET_KEY=$(jq -r '.secret_key // ""' /data/options.json)
 ENABLE_REGISTRATIONS=$(jq -r '.enable_registrations // false' /data/options.json)
 TZ_VALUE=$(jq -r '.timezone // "America/Argentina/Buenos_Aires"' /data/options.json)
 
+# ── Persistencia en /data (HA lo respalda) ────────────────────────────────
+# La imagen omnibus declara VOLUME en /app/backend/data y /app/postgres/data,
+# por lo que el Supervisor monta volumenes Docker anonimos ahi que se PIERDEN
+# al recrear el contenedor. Para que los datos sobrevivan, bind-mounteamos
+# nuestros directorios de /data sobre esos puntos (requiere SYS_ADMIN).
+mkdir -p /data/backend /data/postgres
+mount --bind /data/backend /app/backend/data
+mount --bind /data/postgres /app/postgres/data
+
 export PUID=1000
 export PGID=1000
 export TZ="$TZ_VALUE"
@@ -19,6 +28,4 @@ if [ "$ENABLE_REGISTRATIONS" = "true" ]; then
 fi
 
 # Hand off to the upstream entrypoint (starts embedded Postgres + migrations + supervisord).
-# Data persists in the Docker volumes the Supervisor mounts on /app/backend/data
-# and /app/postgres/data (declared as VOLUME in the upstream image).
 exec /entrypoint.omnibus.sh
