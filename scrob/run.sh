@@ -9,16 +9,14 @@ TZ_VALUE=$(jq -r '.timezone // "America/Argentina/Buenos_Aires"' /data/options.j
 # ── Persistencia en /data (HA lo respalda) ────────────────────────────────
 # La imagen omnibus declara VOLUME en /app/backend/data y /app/postgres/data,
 # por lo que el Supervisor monta volumenes Docker anonimos ahi que se PIERDEN
-# al recrear el contenedor. Para que los datos sobrevivan, desmontamos esos
-# volumenes anonimos y bind-mounteamos nuestros directorios de /data sobre
-# esos puntos (requiere SYS_ADMIN).
+# al recrear el contenedor. Para que los datos sobrevivan, parcheamos el
+# entrypoint para que use /data directamente (sin mount --bind, que falla
+# porque esos puntos ya son mounts del host).
 mkdir -p /data/backend /data/postgres
-# Desmontar los volumenes anonimos (ignorar si no estan montados)
-umount /app/backend/data 2>/dev/null || true
-umount /app/postgres/data 2>/dev/null || true
-# Bind-mountear /data sobre los puntos de la imagen
-mount --bind /data/backend /app/backend/data
-mount --bind /data/postgres /app/postgres/data
+# Reescribir las rutas hardcodeadas del entrypoint hacia /data
+sed -i 's|PGDATA=/app/postgres/data|PGDATA=/data/postgres|g' /entrypoint.omnibus.sh
+sed -i 's|/app/backend/data|/data/backend|g' /entrypoint.omnibus.sh
+sed -i 's|/app/postgres/data|/data/postgres|g' /entrypoint.omnibus.sh
 
 export PUID=1000
 export PGID=1000
